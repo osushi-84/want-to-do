@@ -142,8 +142,8 @@
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
     }
-    .cr-card .cr-ic { font-size: 1.5rem; }
-    .cr-card .cr-tx { font-size: .88rem; }
+    .cr-card .cr-ic { font-size: 1.05rem; }
+    .cr-card .cr-tx { font-size: .7rem; }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
        MODE 3  SPHERE
@@ -281,8 +281,8 @@ function initCarousel(){
   root.innerHTML = '';
 
   const n = items.length;
-  const cardW = 130, cardH = 90;
-  const radius = Math.round((n * (cardW + 30)) / (2 * Math.PI) * 0.65);
+  const cardW = 85, cardH = 62;
+  const radius = Math.round((n * 160) / (2 * Math.PI)); /* 間隔固定で元のサイズ */
 
   const stage = document.createElement('div');
   stage.className = 'cr-stage';
