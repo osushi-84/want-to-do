@@ -424,10 +424,13 @@
         projected.sort((a,b) => a.z - b.z);
 
         projected.forEach(({el, px, py, s, z}, i) => {
+          const t  = (z + R) / (2 * R);              // 0(奥) → 1(手前)
+          const op = t * t * (3 - 2 * t);            // smoothstep で連続的にフェード
           const fs = 0.6 + s * 0.5;
           el.style.cssText =
             `left:${px}px;top:${py}px;`+
             `transform:translate(-50%,-50%) scale(${s.toFixed(3)});`+
+            `opacity:${op.toFixed(3)};`+
             `font-size:${fs.toFixed(2)}rem;`+
             `color:#eee8d8;`+
             `z-index:${i};`;
