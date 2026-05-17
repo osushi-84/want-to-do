@@ -183,7 +183,10 @@
       position: relative;
       height: 75vh;
       overflow: hidden;
+      cursor: grab;
+      user-select: none;
     }
+    .sphere-wrap:active { cursor: grabbing; }
     .sp-tag {
       position: absolute;
       white-space: nowrap;
@@ -410,8 +413,39 @@
       });
 
       let ay = 0, ax = 0;
+      let vy = 0.0018, vx = 0.0004;
+      let dragging = false, lastX = 0, lastY = 0;
+
+      const onDown = e => {
+        dragging = true;
+        lastX = e.touches ? e.touches[0].clientX : e.clientX;
+        lastY = e.touches ? e.touches[0].clientY : e.clientY;
+        vy = 0; vx = 0;
+      };
+      const onMove = e => {
+        if (!dragging) return;
+        const x = e.touches ? e.touches[0].clientX : e.clientX;
+        const y = e.touches ? e.touches[0].clientY : e.clientY;
+        vy = (x - lastX) * 0.004;
+        vx = (y - lastY) * 0.004;
+        ay += vy; ax += vx;
+        lastX = x; lastY = y;
+      };
+      const onUp = () => { dragging = false; };
+
+      wrap.addEventListener('mousedown',  onDown);
+      wrap.addEventListener('touchstart', onDown, {passive:true});
+      window.addEventListener('mousemove',  onMove);
+      window.addEventListener('touchmove',  onMove, {passive:true});
+      window.addEventListener('mouseup',  onUp);
+      window.addEventListener('touchend', onUp);
+
       (function tick() {
-        ay += 0.0018; ax += 0.0004;
+        if (!dragging) {
+          vy += (0.0018 - vy) * 0.02;  /* 慣性後にオートに戻る */
+          vx += (0.0004 - vx) * 0.02;
+        }
+        ay += vy; ax += vx;
         const cX=Math.cos(ax), sX=Math.sin(ax);
         const cY=Math.cos(ay), sY=Math.sin(ay);
 
