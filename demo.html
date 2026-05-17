@@ -288,6 +288,7 @@ function initCarousel(){
   stage.className = 'cr-stage';
   stage.style.cssText = `width:${cardW}px;height:${cardH}px;`;
 
+  const cards = [];
   items.forEach((it, i) => {
     const card = document.createElement('div');
     card.className = 'cr-card';
@@ -297,6 +298,7 @@ function initCarousel(){
       `transform:rotateY(${(360/n)*i}deg) translateZ(${radius}px);`;
     card.innerHTML=`<span class="cr-ic">${it.e}</span><span class="cr-tx">${it.t}</span>`;
     stage.appendChild(card);
+    cards.push({ el: card, baseAngle: (360/n)*i });
   });
   root.appendChild(stage);
 
@@ -312,8 +314,8 @@ function initCarousel(){
     if (!dragging) return;
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const dx = x - lastX;
-    vel = dx * 0.35;
-    ang += dx * 0.25;
+    vel = dx * 0.15;      /* 感度を下げた */
+    ang += dx * 0.10;
     lastX = x;
   };
   const onUp = () => { dragging = false; };
@@ -330,12 +332,20 @@ function initCarousel(){
       /* user controls */
     } else if (Math.abs(vel) > 0.05) {
       ang += vel;
-      vel *= 0.92;          /* friction */
+      vel *= 0.92;
     } else {
-      ang += AUTO_SPEED;    /* auto-rotate */
+      ang += AUTO_SPEED;
       vel = 0;
     }
     stage.style.transform = `rotateY(${ang}deg)`;
+
+    /* 端ほど透明：実効角度のcosで不透明度を計算 */
+    cards.forEach(({ el, baseAngle }) => {
+      const eff = ((baseAngle + ang) % 360 + 360) % 360;
+      const op  = Math.max(0, Math.cos(eff * Math.PI / 180));
+      el.style.opacity = op.toFixed(3);
+    });
+
     rafs.carousel = requestAnimationFrame(tick);
   }
   tick();
