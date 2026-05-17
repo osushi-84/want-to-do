@@ -117,7 +117,8 @@
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
        MODE 2  3D CAROUSEL
     ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-    #v-carousel { perspective: 1400px; }
+    #v-carousel { perspective: 1400px; cursor: grab; user-select: none; }
+    #v-carousel:active { cursor: grabbing; }
     .cr-stage {
       position: relative;
       transform-style: preserve-3d;
@@ -138,6 +139,8 @@
       color: var(--text);
       text-align: center;
       cursor: default;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
     .cr-card .cr-ic { font-size: 1.5rem; }
     .cr-card .cr-tx { font-size: .88rem; }
@@ -222,7 +225,11 @@ const items = [
 
 /* ─── NAV ─── */
 let rafs = {};
-function stopAll(){ Object.values(rafs).forEach(cancelAnimationFrame); rafs={}; }
+function stopAll(){
+  if (_crCleanup) { _crCleanup(); _crCleanup = null; }
+  Object.values(rafs).forEach(cancelAnimationFrame);
+  rafs = {};
+}
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -265,7 +272,11 @@ initMarquee();
 /* ═══════════════════════════════
    MODE 2  3D CAROUSEL
 ═══════════════════════════════ */
+let _crCleanup = null;
+
 function initCarousel(){
+  if (_crCleanup) { _crCleanup(); _crCleanup = null; }
+
   const root = document.getElementById('v-carousel');
   root.innerHTML = '';
 
@@ -289,13 +300,54 @@ function initCarousel(){
   });
   root.appendChild(stage);
 
-  let ang = 0;
+  const AUTO_SPEED = 0.04;
+  let ang = 0, vel = 0, dragging = false, lastX = 0;
+
+  const onDown = e => {
+    dragging = true;
+    lastX = e.touches ? e.touches[0].clientX : e.clientX;
+    vel = 0;
+  };
+  const onMove = e => {
+    if (!dragging) return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const dx = x - lastX;
+    vel = dx * 0.35;
+    ang += dx * 0.25;
+    lastX = x;
+  };
+  const onUp = () => { dragging = false; };
+
+  root.addEventListener('mousedown',  onDown);
+  root.addEventListener('touchstart', onDown, {passive:true});
+  window.addEventListener('mousemove',  onMove);
+  window.addEventListener('touchmove',  onMove, {passive:true});
+  window.addEventListener('mouseup',  onUp);
+  window.addEventListener('touchend', onUp);
+
   function tick(){
-    ang += 0.12;
+    if (dragging) {
+      /* user controls */
+    } else if (Math.abs(vel) > 0.05) {
+      ang += vel;
+      vel *= 0.92;          /* friction */
+    } else {
+      ang += AUTO_SPEED;    /* auto-rotate */
+      vel = 0;
+    }
     stage.style.transform = `rotateY(${ang}deg)`;
     rafs.carousel = requestAnimationFrame(tick);
   }
   tick();
+
+  _crCleanup = () => {
+    root.removeEventListener('mousedown',  onDown);
+    root.removeEventListener('touchstart', onDown);
+    window.removeEventListener('mousemove',  onMove);
+    window.removeEventListener('touchmove',  onMove);
+    window.removeEventListener('mouseup',  onUp);
+    window.removeEventListener('touchend', onUp);
+  };
 }
 
 /* ═══════════════════════════════
