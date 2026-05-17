@@ -404,12 +404,14 @@
         };
       });
 
-      const tags = pts.map(p => {
+      const tags = pts.map((p, i) => {
+        const hue = Math.round((i / artists.length) * 360);
+        const color = `hsl(${hue},70%,72%)`;
         const el = document.createElement('div');
         el.className = 'sp-tag';
         el.textContent = p.name;
         wrap.appendChild(el);
-        return {el, ox:p.ox, oy:p.oy, oz:p.oz};
+        return {el, ox:p.ox, oy:p.oy, oz:p.oz, color};
       });
 
       let ay = 0, ax = 0;
@@ -457,7 +459,7 @@
         });
         projected.sort((a,b) => a.z - b.z);
 
-        projected.forEach(({el, px, py, s, z}, i) => {
+        projected.forEach(({el, px, py, s, z, color}, i) => {
           const t  = 1 - (z + R) / (2 * R);           // 1(奥) → 0(手前)
           const op = t * t * (3 - 2 * t);            // smoothstep で連続的にフェード
           const fs = 0.6 + s * 0.5;
@@ -466,7 +468,7 @@
             `transform:translate(-50%,-50%) scale(${s.toFixed(3)});`+
             `opacity:${op.toFixed(3)};`+
             `font-size:${fs.toFixed(2)}rem;`+
-            `color:#eee8d8;`+
+            `color:${color};`+
             `z-index:${i};`;
         });
         requestAnimationFrame(tick);
