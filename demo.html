@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>やりたいことリスト — デモ比較</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #07080f;
+      --text:     #eee8d8;
+      --text-2:   #6a6358;
+      --text-3:   #2e2b26;
+      --amber:    #d98b00;
+      --amber-br: #f5a800;
+      --amber-gl: rgba(217,139,0,.12);
+      --teal:     #38c9b8;
+      --border:   rgba(255,255,255,0.07);
+      --serif:    'Noto Serif JP', serif;
+      --sans:     'Noto Sans JP', sans-serif;
+      --mono:     'IBM Plex Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-weight: 300;
+      overflow: hidden;
+      height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ═══ NAV ═══ */
+    .nav {
+      position: fixed;
+      top: 1.25rem; left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      display: flex;
+      gap: .3rem;
+      background: rgba(7,8,15,.88);
+      border: 1px solid var(--border);
+      padding: .35rem;
+      border-radius: 6px;
+      backdrop-filter: blur(14px);
+    }
+    .nav-btn {
+      font-family: var(--mono);
+      font-size: .58rem;
+      letter-spacing: .12em;
+      padding: .4rem .85rem;
+      border: none; border-radius: 3px;
+      background: transparent;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: color .18s, background .18s;
+    }
+    .nav-btn:hover { color: var(--text); }
+    .nav-btn.on { background: var(--amber); color: #07080f; font-weight: 600; }
+
+    /* ═══ VIEW SHELLS ═══ */
+    .view {
+      position: fixed; inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .view.on { display: flex; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MODE 1  MARQUEE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #v-marquee {
+      flex-direction: column;
+      gap: 1.2rem;
+      overflow: hidden;
+    }
+    .mq-row {
+      display: flex;
+      gap: 1rem;
+      white-space: nowrap;
+      will-change: transform;
+    }
+    .mq-row.r1 { animation: mLeft  40s linear infinite; }
+    .mq-row.r2 { animation: mRight 32s linear infinite; }
+    .mq-row.r3 { animation: mLeft  48s linear infinite; }
+    .mq-row:hover { animation-play-state: paused; }
+    @keyframes mLeft  { from{transform:translateX(0)}   to{transform:translateX(-50%)} }
+    @keyframes mRight { from{transform:translateX(-50%)} to{transform:translateX(0)} }
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .65rem 1.35rem;
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      background: rgba(255,255,255,.025);
+      font-family: var(--serif);
+      font-size: 1rem;
+      color: var(--text);
+      white-space: nowrap;
+      transition: border-color .2s, background .2s;
+      cursor: default;
+      flex-shrink: 0;
+    }
+    .chip:hover { border-color: var(--amber); background: var(--amber-gl); }
+    .chip .ci { font-size: 1.15rem; }
+    /* size variants for rows */
+    .r1 .chip { font-size: 1.05rem; }
+    .r2 .chip { font-size: .88rem;  padding: .5rem 1.1rem; }
+    .r3 .chip { font-size: .72rem;  padding: .4rem .9rem;  opacity: .55; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MODE 2  3D CAROUSEL
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #v-carousel { perspective: 1400px; }
+    .cr-stage {
+      position: relative;
+      transform-style: preserve-3d;
+    }
+    .cr-card {
+      position: absolute;
+      transform-style: preserve-3d;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: .45rem;
+      background: rgba(255,255,255,.038);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px;
+      font-family: var(--serif);
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      cursor: default;
+    }
+    .cr-card .cr-ic { font-size: 1.5rem; }
+    .cr-card .cr-tx { font-size: .88rem; }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MODE 3  SPHERE
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #v-sphere { position: fixed; inset: 0; }
+    .sp-tag {
+      position: absolute;
+      white-space: nowrap;
+      font-family: var(--serif);
+      font-weight: 700;
+      pointer-events: none;
+      user-select: none;
+      transform-origin: center center;
+    }
+
+    /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+       MODE 4  ORBIT
+    ━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+    #v-orbit { position: fixed; inset: 0; }
+    .ob-ring {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .ob-dot {
+      position: absolute;
+      white-space: nowrap;
+      font-family: var(--serif);
+      font-weight: 700;
+      font-size: .82rem;
+      padding: .2rem .65rem;
+      border-radius: 100px;
+      pointer-events: none;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <button class="nav-btn on" data-m="marquee">横流れ</button>
+  <button class="nav-btn"    data-m="carousel">3Dカルーセル</button>
+  <button class="nav-btn"    data-m="sphere">球体</button>
+  <button class="nav-btn"    data-m="orbit">オービット</button>
+</nav>
+
+<div id="v-marquee"  class="view on"></div>
+<div id="v-carousel" class="view"></div>
+<div id="v-sphere"   class="view"></div>
+<div id="v-orbit"    class="view"></div>
+
+<script>
+const items = [
+  {e:'🏕️', t:'キャンプ'},
+  {e:'🎯', t:'サバゲー'},
+  {e:'🎵', t:'楽器演奏'},
+  {e:'🎬', t:'アニメ制作'},
+  {e:'🗻', t:'富士登山'},
+  {e:'🎨', t:'写生'},
+  {e:'💎', t:'きれいな石を探す'},
+  {e:'🌿', t:'かっこいい木の棒'},
+  {e:'♠️', t:'がちポーカー'},
+  {e:'🎻', t:'クラシック鑑賞'},
+  {e:'🎮', t:'ゲーム実況'},
+  {e:'✍️', t:'執筆'},
+  {e:'💼', t:'副業'},
+  {e:'📈', t:'経営'},
+  {e:'🍕', t:'ピザづくり'},
+  {e:'❄️', t:'かまくらづくり'},
+  {e:'⭐', t:'星を見る'},
+  {e:'🔨', t:'日曜大工'},
+  {e:'🌌', t:'オーロラを見る'},
+  {e:'🔍', t:'趣味を見つける'},
+  {e:'☕', t:'カフェ巡り'},
+  {e:'💬', t:'座談会'},
+  {e:'🏹', t:'アーチェリー'},
+  {e:'🎋', t:'弓道'},
+];
+
+/* ─── NAV ─── */
+let rafs = {};
+function stopAll(){ Object.values(rafs).forEach(cancelAnimationFrame); rafs={}; }
+
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    stopAll();
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    btn.classList.add('on');
+    const m = btn.dataset.m;
+    document.getElementById(`v-${m}`).classList.add('on');
+    ({marquee:initMarquee, carousel:initCarousel, sphere:initSphere, orbit:initOrbit})[m]();
+  });
+});
+
+/* ═══════════════════════════════
+   MODE 1  MARQUEE
+═══════════════════════════════ */
+function initMarquee(){
+  const root = document.getElementById('v-marquee');
+  if(root.childElementCount) return;
+
+  const mk = (it) => {
+    const el = document.createElement('div');
+    el.className='chip';
+    el.innerHTML=`<span class="ci">${it.e}</span>${it.t}`;
+    return el;
+  };
+  const mkRow = (cls, list) => {
+    const row = document.createElement('div');
+    row.className = `mq-row ${cls}`;
+    // duplicate for seamless loop
+    [...list,...list].forEach(it => row.appendChild(mk(it)));
+    return row;
+  };
+  root.appendChild(mkRow('r1', items));
+  root.appendChild(mkRow('r2', [...items].reverse()));
+  root.appendChild(mkRow('r3', [...items.slice(8),...items.slice(0,8)]));
+}
+initMarquee();
+
+/* ═══════════════════════════════
+   MODE 2  3D CAROUSEL
+═══════════════════════════════ */
+function initCarousel(){
+  const root = document.getElementById('v-carousel');
+  root.innerHTML = '';
+
+  const n = items.length;
+  const cardW = 130, cardH = 90;
+  const radius = Math.round((n * (cardW + 30)) / (2 * Math.PI));
+
+  const stage = document.createElement('div');
+  stage.className = 'cr-stage';
+  stage.style.cssText = `width:${cardW}px;height:${cardH}px;`;
+
+  items.forEach((it, i) => {
+    const card = document.createElement('div');
+    card.className = 'cr-card';
+    card.style.cssText =
+      `width:${cardW}px;height:${cardH}px;`+
+      `left:${-cardW/2}px;top:${-cardH/2}px;`+
+      `transform:rotateY(${(360/n)*i}deg) translateZ(${radius}px);`;
+    card.innerHTML=`<span class="cr-ic">${it.e}</span><span class="cr-tx">${it.t}</span>`;
+    stage.appendChild(card);
+  });
+  root.appendChild(stage);
+
+  let ang = 0;
+  function tick(){
+    ang += 0.12;
+    stage.style.transform = `rotateY(${ang}deg)`;
+    rafs.carousel = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ═══════════════════════════════
+   MODE 3  SPHERE
+═══════════════════════════════ */
+function initSphere(){
+  const root = document.getElementById('v-sphere');
+  root.innerHTML = '';
+
+  const W = window.innerWidth, H = window.innerHeight;
+  const R = Math.min(W,H) * 0.33;
+  const fov = 560;
+  const φ = (1+Math.sqrt(5))/2;
+
+  const pts = items.map((it,i)=>{
+    const θ = Math.acos(1 - 2*(i+.5)/items.length);
+    const λ = 2*Math.PI*i/φ;
+    return {
+      ox: R*Math.sin(θ)*Math.cos(λ),
+      oy: R*Math.sin(θ)*Math.sin(λ),
+      oz: R*Math.cos(θ),
+      it
+    };
+  });
+
+  const tags = pts.map(p=>{
+    const el = document.createElement('div');
+    el.className='sp-tag';
+    el.textContent=`${p.it.e} ${p.it.t}`;
+    root.appendChild(el);
+    return {el, ox:p.ox, oy:p.oy, oz:p.oz};
+  });
+
+  let ay=0, ax=0;
+  function tick(){
+    ay += 0.0045; ax += 0.0012;
+    const cX=Math.cos(ax),sX=Math.sin(ax),cY=Math.cos(ay),sY=Math.sin(ay);
+
+    // sort by z for painter's algorithm
+    const projected = tags.map(({el,ox,oy,oz})=>{
+      const x1=ox*cY-oz*sY, z1=ox*sY+oz*cY;
+      const y2=oy*cX-z1*sX, z2=oy*sX+z1*cX;
+      const s = fov/(fov+z2);
+      return {el, px:W/2+x1*s, py:H/2+y2*s, s, z:z2};
+    });
+    projected.sort((a,b)=>a.z-b.z);
+    projected.forEach(({el,px,py,s,z},i)=>{
+      const op = .15 + ((z+R)/(2*R))*0.85;
+      const fs = 0.65 + s*0.45;
+      el.style.cssText=
+        `left:${px}px;top:${py}px;`+
+        `transform:translate(-50%,-50%) scale(${s.toFixed(3)});`+
+        `opacity:${op.toFixed(3)};`+
+        `font-size:${fs.toFixed(2)}rem;`+
+        `z-index:${i};`+
+        `color:${z>0?'#eee8d8':'#6a6358'};`;
+    });
+    rafs.sphere = requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ═══════════════════════════════
+   MODE 4  ORBIT
+═══════════════════════════════ */
+function initOrbit(){
+  const root = document.getElementById('v-orbit');
+  root.innerHTML='';
+
+  const W=window.innerWidth, H=window.innerHeight;
+  const cx=W/2, cy=H/2;
+
+  // ring definitions
+  const defs=[
+    {rx:200,ry:75,  tilt:0,   speed:0.0040, col:'rgba(217,139,0,',  items:items.slice(0,8)},
+    {rx:330,ry:110, tilt:-.5, speed:-0.0028, col:'rgba(56,201,184,', items:items.slice(8,16)},
+    {rx:450,ry:145, tilt:.35, speed:0.0018, col:'rgba(180,140,255,', items:items.slice(16)},
+  ];
+
+  // draw ellipse rings as SVG (behind dots)
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText=`position:absolute;inset:0;width:100%;height:100%;pointer-events:none;`;
+  defs.forEach(d=>{
+    const el=document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    el.setAttribute('cx',cx);
+    el.setAttribute('cy',cy);
+    el.setAttribute('rx',d.rx);
+    el.setAttribute('ry',d.ry);
+    el.setAttribute('fill','none');
+    el.setAttribute('stroke',d.col+'0.18)');
+    el.setAttribute('stroke-width','1');
+    el.setAttribute('transform',`rotate(${(d.tilt*180/Math.PI).toFixed(1)},${cx},${cy})`);
+    svg.appendChild(el);
+  });
+  root.appendChild(svg);
+
+  // create dot elements
+  const dotMeta = defs.flatMap((d,ri)=>
+    d.items.map((it,j)=>({
+      it, d, ri,
+      a0: (2*Math.PI/d.items.length)*j
+    }))
+  );
+  const colors = [
+    ['rgba(217,139,0,.12)','rgba(217,139,0,.45)'],
+    ['rgba(56,201,184,.10)','rgba(56,201,184,.45)'],
+    ['rgba(180,140,255,.10)','rgba(180,140,255,.45)'],
+  ];
+  const dots = dotMeta.map(({it,ri})=>{
+    const el=document.createElement('div');
+    el.className='ob-dot';
+    el.innerHTML=`${it.e} ${it.t}`;
+    const [bg,bd]=colors[ri];
+    el.style.background=bg;
+    el.style.border=`1px solid ${bd}`;
+    el.style.color=ri===0?'#f5a800':ri===1?'#38c9b8':'#c4a8ff';
+    root.appendChild(el);
+    return el;
+  });
+
+  let t=0;
+  function tick(){
+    t++;
+    dotMeta.forEach(({d,a0},i)=>{
+      const a = a0 + t*d.speed;
+      // parametric ellipse + tilt rotation
+      const ex = d.rx*Math.cos(a);
+      const ey = d.ry*Math.sin(a);
+      // apply tilt (rotate around x-axis approximation via y scaling)
+      const cosT=Math.cos(d.tilt), sinT=Math.sin(d.tilt);
+      const px = cx + ex*cosT - ey*sinT*0.3;
+      const py = cy + ex*sinT*0.3 + ey*cosT;
+      dots[i].style.left=`${px}px`;
+      dots[i].style.top=`${py}px`;
+      dots[i].style.transform='translate(-50%,-50%)';
+    });
+    rafs.orbit=requestAnimationFrame(tick);
+  }
+  tick();
+}
+</script>
+</body>
+</html>
