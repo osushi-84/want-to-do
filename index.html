@@ -426,7 +426,7 @@
         if (!dragging) return;
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         const y = e.touches ? e.touches[0].clientY : e.clientY;
-        vy = (x - lastX) * 0.004;
+        vy = (lastX - x) * 0.004;
         vx = (y - lastY) * 0.004;
         ay += vy; ax += vx;
         lastX = x; lastY = y;
