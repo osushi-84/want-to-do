@@ -411,7 +411,7 @@
 
       let ay = 0, ax = 0;
       (function tick() {
-        ay += 0.004; ax += 0.001;
+        ay += 0.0018; ax += 0.0004;
         const cX=Math.cos(ax), sX=Math.sin(ax);
         const cY=Math.cos(ay), sY=Math.sin(ay);
 
@@ -424,14 +424,12 @@
         projected.sort((a,b) => a.z - b.z);
 
         projected.forEach(({el, px, py, s, z}, i) => {
-          const op = .12 + ((z+R)/(2*R)) * .88;
           const fs = 0.6 + s * 0.5;
           el.style.cssText =
             `left:${px}px;top:${py}px;`+
             `transform:translate(-50%,-50%) scale(${s.toFixed(3)});`+
-            `opacity:${op.toFixed(3)};`+
             `font-size:${fs.toFixed(2)}rem;`+
-            `color:${z > 0 ? '#eee8d8' : '#6a6358'};`+
+            `color:#eee8d8;`+
             `z-index:${i};`;
         });
         requestAnimationFrame(tick);
