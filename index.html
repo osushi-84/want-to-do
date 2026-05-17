@@ -428,7 +428,7 @@
         if (!dragging) return;
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         const y = e.touches ? e.touches[0].clientY : e.clientY;
-        vy = (lastX - x) * 0.004;
+        vy = (x - lastX) * 0.004;
         vx = (y - lastY) * 0.004;
         ay += vy; ax += vx;
         lastX = x; lastY = y;
@@ -451,7 +451,7 @@
         const cX=Math.cos(ax), sX=Math.sin(ax);
         const cY=Math.cos(ay), sY=Math.sin(ay);
 
-        const projected = tags.map(({el, ox, oy, oz}) => {
+        const projected = tags.map(({el, ox, oy, oz, color}) => {
           const x1 = ox*cY - oz*sY, z1 = ox*sY + oz*cY;
           const y2 = oy*cX - z1*sX, z2 = oy*sX + z1*cX;
           const s = fov / (fov + z2);
