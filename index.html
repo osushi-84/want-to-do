@@ -218,6 +218,10 @@
       .hero-stats { gap: 1.75rem; }
       .carousel-wrap { height: 50vh; }
       .sphere-wrap   { height: 60vh; }
+      .cr-card { gap: .2rem; }
+      .cr-ic   { font-size: .72rem; }
+      .cr-tx   { font-size: .52rem; }
+      .sp-tag  { font-size: .6rem !important; }
     }
   </style>
 </head>
@@ -346,8 +350,9 @@
   function initCarousel(wrapId, data) {
     const wrap = document.getElementById(wrapId);
     const n = data.length;
-    const cardW = 85, cardH = 62;
-    const radius = 600;
+    const isMobile = window.innerWidth < 640;
+    const cardW = isMobile ? 62 : 85, cardH = isMobile ? 46 : 62;
+    const radius = isMobile ? 260 : 600;
     const slots = Math.ceil(24 / n) * n;     // nの倍数で24以上（リングを常に埋める）
     const step = 360 / slots;
     const loop = Array.from({length: slots}, (_, i) => data[i % n]);
