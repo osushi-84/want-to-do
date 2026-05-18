@@ -380,6 +380,7 @@
     const onDown = e => { dragging = true; lastX = e.touches ? e.touches[0].clientX : e.clientX; vel = 0; };
     const onMove = e => {
       if (!dragging) return;
+      if (e.cancelable) e.preventDefault();
       const x = e.touches ? e.touches[0].clientX : e.clientX;
       const dx = x - lastX;
       vel = dx * 0.15; ang += dx * 0.10; lastX = x;
@@ -389,7 +390,7 @@
     wrap.addEventListener('mousedown',  onDown);
     wrap.addEventListener('touchstart', onDown, {passive:true});
     window.addEventListener('mousemove',  onMove);
-    window.addEventListener('touchmove',  onMove, {passive:true});
+    window.addEventListener('touchmove',  onMove, {passive:false});
     window.addEventListener('mouseup',  onUp);
     window.addEventListener('touchend', onUp);
 
@@ -469,6 +470,7 @@
       };
       const onMove = e => {
         if (!dragging) return;
+        if (e.cancelable) e.preventDefault();
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         const y = e.touches ? e.touches[0].clientY : e.clientY;
         dragDist += Math.hypot(x - lastX, y - lastY);
@@ -482,7 +484,7 @@
       wrap.addEventListener('mousedown',  onDown);
       wrap.addEventListener('touchstart', onDown, {passive:true});
       window.addEventListener('mousemove',  onMove);
-      window.addEventListener('touchmove',  onMove, {passive:true});
+      window.addEventListener('touchmove',  onMove, {passive:false});
       window.addEventListener('mouseup',  onUp);
       window.addEventListener('touchend', onUp);
 
