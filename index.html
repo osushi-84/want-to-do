@@ -150,7 +150,7 @@
        CAROUSEL
     ════════════════════════════ */
     .carousel-wrap {
-      height: 62vh;
+      height: 44vh;
       perspective: 1400px;
       display: flex; align-items: center; justify-content: center;
       cursor: grab; user-select: none; overflow: hidden;
@@ -181,7 +181,7 @@
     }
     .sphere-wrap {
       position: relative;
-      height: 75vh;
+      height: 55vh;
       overflow: hidden;
       cursor: grab;
       user-select: none;
@@ -216,8 +216,8 @@
     @media (max-width: 640px) {
       .hero-kanji { display: none; }
       .hero-stats { gap: 1.75rem; }
-      .carousel-wrap { height: 50vh; }
-      .sphere-wrap   { height: 60vh; }
+      .carousel-wrap { height: 27vh; }
+      .sphere-wrap   { height: 44vh; }
       .cr-card { gap: .2rem; }
       .cr-ic   { font-size: .72rem; }
       .cr-tx   { font-size: .52rem; }
@@ -509,11 +509,10 @@
           const t  = 1 - (z + R) / (2 * R);
           const op = t * t * (3 - 2 * t);
           const hov = el === hoveredEl;
-          const sc = hov ? s * 1.22 : s;
-          const fs = 0.6 + sc * 0.5;
+          const fs = (0.6 + s * 0.5) * (hov ? 1.22 : 1);
           el.style.cssText =
             `left:${px}px;top:${py}px;`+
-            `transform:translate(-50%,-50%) scale(${sc.toFixed(3)});`+
+            `transform:translate(-50%,-50%);`+
             `opacity:${(hov ? Math.max(op, 0.95) : op).toFixed(3)};`+
             `font-size:${fs.toFixed(2)}rem;`+
             `color:${hov ? '#fff' : color};`+
