@@ -191,7 +191,8 @@
       position: absolute;
       white-space: nowrap;
       font-family: var(--serif); font-weight: 700;
-      pointer-events: none; user-select: none;
+      user-select: none;
+      cursor: pointer;
     }
 
     /* ════════════════════════════
@@ -239,7 +240,7 @@
       <div class="hero-stat__l">やりたいこと</div>
     </div>
     <div>
-      <div class="hero-stat__n">30</div>
+      <div class="hero-stat__n">32</div>
       <div class="hero-stat__l">見たいアーティスト</div>
     </div>
   </div>
@@ -266,7 +267,7 @@
   <div class="eyebrow">— Special —</div>
   <h2 class="sec-title">
     🎵&thinsp;ライブ見に行く
-    <span class="live-badge">30 artists</span>
+    <span class="live-badge">32 artists</span>
   </h2>
   <div class="sphere-wrap" id="sphereWrap"></div>
 </section>
@@ -312,6 +313,7 @@
     'ヨルシカ','ずっと真夜中でいいのに。','yama','nowisee','空白ごっこ',
     'DUSTCELL','神山羊','Pharrel Williams','Taylor Swift','Justin Bieber',
     'ネクライトーキー','Maroon5','チーム・トリケラトプス','バーバパパ','Marshmello',
+    'ゲスの極み乙女。','藤井風',
   ];
 
   /* ════════════════════════════
@@ -410,24 +412,32 @@
         const el = document.createElement('div');
         el.className = 'sp-tag';
         el.textContent = p.name;
+        el.addEventListener('click', () => {
+          if (dragDist > 5) return;
+          window.open(`https://www.google.com/search?q=${encodeURIComponent(p.name + ' ライブ チケット')}`, '_blank');
+        });
+        el.addEventListener('mouseenter', () => { hoveredEl = el; });
+        el.addEventListener('mouseleave', () => { hoveredEl = null; });
         wrap.appendChild(el);
         return {el, ox:p.ox, oy:p.oy, oz:p.oz, color};
       });
 
       let ay = 0, ax = 0;
       let vy = 0.0018, vx = 0.0004;
-      let dragging = false, lastX = 0, lastY = 0;
+      let dragging = false, lastX = 0, lastY = 0, dragDist = 0, hoveredEl = null;
 
       const onDown = e => {
         dragging = true;
         lastX = e.touches ? e.touches[0].clientX : e.clientX;
         lastY = e.touches ? e.touches[0].clientY : e.clientY;
+        dragDist = 0;
         vy = 0; vx = 0;
       };
       const onMove = e => {
         if (!dragging) return;
         const x = e.touches ? e.touches[0].clientX : e.clientX;
         const y = e.touches ? e.touches[0].clientY : e.clientY;
+        dragDist += Math.hypot(x - lastX, y - lastY);
         vy = (x - lastX) * 0.004;
         vx = (y - lastY) * 0.004;
         ay += vy; ax += vx;
@@ -460,16 +470,19 @@
         projected.sort((a,b) => a.z - b.z);
 
         projected.forEach(({el, px, py, s, z, color}, i) => {
-          const t  = 1 - (z + R) / (2 * R);           // 1(奥) → 0(手前)
-          const op = t * t * (3 - 2 * t);            // smoothstep で連続的にフェード
-          const fs = 0.6 + s * 0.5;
+          const t  = 1 - (z + R) / (2 * R);
+          const op = t * t * (3 - 2 * t);
+          const hov = el === hoveredEl;
+          const sc = hov ? s * 1.22 : s;
+          const fs = 0.6 + sc * 0.5;
           el.style.cssText =
             `left:${px}px;top:${py}px;`+
-            `transform:translate(-50%,-50%) scale(${s.toFixed(3)});`+
-            `opacity:${op.toFixed(3)};`+
+            `transform:translate(-50%,-50%) scale(${sc.toFixed(3)});`+
+            `opacity:${(hov ? Math.max(op, 0.95) : op).toFixed(3)};`+
             `font-size:${fs.toFixed(2)}rem;`+
-            `color:${color};`+
-            `z-index:${i};`;
+            `color:${hov ? '#fff' : color};`+
+            `text-shadow:${hov ? `0 0 16px ${color}, 0 0 5px ${color}` : 'none'};`+
+            `z-index:${hov ? 9999 : i};`;
         });
         requestAnimationFrame(tick);
       })();
