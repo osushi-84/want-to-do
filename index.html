@@ -279,7 +279,7 @@
 <section class="section live-section" id="live">
   <div class="eyebrow">— Special —</div>
   <h2 class="sec-title">
-    🎵&thinsp;ライブ見に行く
+    🎵&thinsp;行きたいライブ
     <span class="live-badge">32 artists</span>
   </h2>
   <div class="sphere-wrap" id="sphereWrap"></div>
@@ -347,22 +347,25 @@
     const wrap = document.getElementById(wrapId);
     const n = data.length;
     const cardW = 85, cardH = 62;
-    const radius = Math.round((n * 160) / (2 * Math.PI));
+    const radius = 600;
+    const slots = Math.ceil(24 / n) * n;     // nの倍数で24以上（リングを常に埋める）
+    const step = 360 / slots;
+    const loop = Array.from({length: slots}, (_, i) => data[i % n]);
 
     const stage = document.createElement('div');
     stage.className = 'cr-stage';
     stage.style.cssText = `width:${cardW}px;height:${cardH}px;`;
 
-    const cards = data.map((it, i) => {
+    const cards = loop.map((it, i) => {
       const card = document.createElement('div');
       card.className = 'cr-card';
       card.style.cssText =
         `width:${cardW}px;height:${cardH}px;`+
         `left:${-cardW/2}px;top:${-cardH/2}px;`+
-        `transform:rotateY(${(360/n)*i}deg) translateZ(${radius}px);`;
+        `transform:rotateY(${step * i}deg) translateZ(${radius}px);`;
       card.innerHTML = `<span class="cr-ic">${it.e}</span><span class="cr-tx">${it.t}</span>`;
       stage.appendChild(card);
-      return { el: card, baseAngle: (360/n)*i };
+      return { el: card, baseAngle: step * i };
     });
     wrap.appendChild(stage);
 
