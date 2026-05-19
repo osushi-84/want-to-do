@@ -1,0 +1,32 @@
+# 実装メモ
+
+---
+
+## [claudecode] 2026-05-19 — 初期セッション実装まとめ
+
+### やったこと
+
+**データ管理**
+- `やりたいこと.txt` をやりたいこと / やってみたいこと / 行きたいライブ の3セクションに整形
+- txt を正として、index.html のデータを手動同期する運用に
+
+**カルーセル**
+- `initCarousel(wrapId, data)` に共通関数化し、2セクションで使い回し
+- 半径を固定（600px / モバイル 260px）してアイテム数に依存しない見た目に
+- スロット数 = `Math.ceil(24 / n) * n` でアイテムを複製して全周を埋め、途切れなくループ
+- angular step = 360 / slots で常に一定間隔
+
+**スフィア**
+- アーティスト名クリック → `window.open` で Google 検索（ライブ チケット）を別タブ
+- ホバー時: font-size 1.22 倍・color #fff・text-shadow でカラーグロー
+- 当たり判定の問題（transform: scale は hit area に影響しない）を `font-size` のみで奥行きスケールすることで解消
+
+**モバイル対応**
+- カルーセル: 半径 260px・カード 62×46px・フォント縮小（メディアクエリ + JS の isMobile フラグ）
+- スフィア: `.sp-tag { font-size: .6rem !important }` でフォント縮小（JS inline style を上書きするため !important 必須）
+- `touchmove` を `passive: false` にして `e.preventDefault()` でドラッグ中の画面スクロールを防止
+
+### 気をつけること
+
+- スフィアのフォントサイズは tick() 内で毎フレーム inline style で上書きされるため、CSS から変更する場合は `!important` が必要
+- カルーセルの `isMobile` は初期化時の `window.innerWidth` で判定しているため、リサイズしても更新されない（許容）
