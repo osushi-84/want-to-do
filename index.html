@@ -244,11 +244,11 @@
       <div class="hero-stat__l">やりたいこと</div>
     </div>
     <div>
-      <div class="hero-stat__n">27</div>
+      <div class="hero-stat__n">28</div>
       <div class="hero-stat__l">やってみたいこと</div>
     </div>
     <div>
-      <div class="hero-stat__n">32</div>
+      <div class="hero-stat__n">33</div>
       <div class="hero-stat__l">見たいアーティスト</div>
     </div>
   </div>
@@ -284,7 +284,7 @@
   <div class="eyebrow">— Special —</div>
   <h2 class="sec-title">
     🎵&thinsp;行きたいライブ
-    <span class="live-badge">32 artists</span>
+    <span class="live-badge">33 artists</span>
   </h2>
   <div class="sphere-wrap" id="sphereWrap"></div>
 </section>
@@ -328,7 +328,7 @@
     {e:'🍕', t:'ピザづくり'},
     {e:'❄️', t:'かまくらづくり'},
     {e:'⭐', t:'星を見る（がちの）'},
-    {e:'🔨', t:'日曜大工'},
+    {e:'🔨', t:'日曜大工（土曜でも可）'},
     {e:'🌌', t:'オーロラを見る'},
     {e:'🔍', t:'趣味を見つける'},
     {e:'☕', t:'カフェ巡り'},
@@ -338,6 +338,7 @@
     {e:'📱', t:'アプリ開発'},
     {e:'👨‍🍳', t:'料理教室'},
     {e:'🙏', t:'テクノ法要'},
+    {e:'🧳', t:'一人旅'},
   ];
 
   const artists = [
@@ -347,7 +348,7 @@
     'ヨルシカ','ずっと真夜中でいいのに。','yama','nowisee','空白ごっこ',
     'DUSTCELL','神山羊','Pharrel Williams','Taylor Swift','Justin Bieber',
     'ネクライトーキー','Maroon5','チーム・トリケラトプス','バーバパパ','Marshmello',
-    'ゲスの極み乙女。','藤井風',
+    'ゲスの極み乙女。','藤井風','おいしくるメロンパン',
   ];
 
   /* ════════════════════════════
@@ -359,15 +360,17 @@
     const isMobile = window.innerWidth < 640;
     const cardW = isMobile ? 62 : 85, cardH = isMobile ? 46 : 62;
     const radius = isMobile ? 260 : 600;
-    const slots = Math.ceil(24 / n) * n;     // nの倍数で24以上（リングを常に埋める）
-    const step = 360 / slots;
-    const loop = Array.from({length: slots}, (_, i) => data[i % n]);
+    const SLOTS = 24;                        // 常に24枚固定
+    const step = 360 / SLOTS;
 
     const stage = document.createElement('div');
     stage.className = 'cr-stage';
     stage.style.cssText = `width:${cardW}px;height:${cardH}px;`;
 
-    const cards = loop.map((it, i) => {
+    let nextIdx = SLOTS;                     // 次に表示するデータのインデックス
+
+    const cards = Array.from({length: SLOTS}, (_, i) => {
+      const it = data[i % n];
       const card = document.createElement('div');
       card.className = 'cr-card';
       card.style.cssText =
@@ -376,7 +379,7 @@
         `transform:rotateY(${step * i}deg) translateZ(${radius}px);`;
       card.innerHTML = `<span class="cr-ic">${it.e}</span><span class="cr-tx">${it.t}</span>`;
       stage.appendChild(card);
-      return { el: card, baseAngle: step * i };
+      return { el: card, baseAngle: step * i, inBack: false };
     });
     wrap.appendChild(stage);
 
@@ -406,9 +409,19 @@
         else { ang += AUTO; vel = 0; }
       }
       stage.style.transform = `rotateY(${ang}deg)`;
-      cards.forEach(({el, baseAngle}) => {
-        const eff = ((baseAngle + ang) % 360 + 360) % 360;
-        el.style.opacity = Math.max(0, Math.cos(eff * Math.PI / 180)).toFixed(3);
+      cards.forEach(c => {
+        const eff = ((c.baseAngle + ang) % 360 + 360) % 360;
+        c.el.style.opacity = Math.max(0, Math.cos(eff * Math.PI / 180)).toFixed(3);
+
+        // 裏側に入った瞬間にコンテンツを差し替え
+        const nowInBack = eff > 90 && eff < 270;
+        if (nowInBack && !c.inBack) {
+          const it = data[nextIdx % n];
+          nextIdx++;
+          c.el.querySelector('.cr-ic').textContent = it.e;
+          c.el.querySelector('.cr-tx').textContent = it.t;
+        }
+        c.inBack = nowInBack;
       });
       requestAnimationFrame(tick);
     })();
